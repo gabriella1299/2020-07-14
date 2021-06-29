@@ -53,7 +53,13 @@ public class FXMLController {
 
     @FXML
     void doCreaGrafo(ActionEvent event) {
-
+    	txtResult.clear();
+    	
+    	this.model.creaGrafo();
+    	
+    	txtResult.appendText("Grafo creato!\n");
+    	txtResult.appendText("#vertici: " + this.model.getNVertici() + "\n");
+    	txtResult.appendText("#archi: " + this.model.getNArchi());
     }
 
     @FXML

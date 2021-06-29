@@ -6,6 +6,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
 import it.polito.tdp.PremierLeague.model.Action;
 import it.polito.tdp.PremierLeague.model.Match;
 import it.polito.tdp.PremierLeague.model.Player;
@@ -36,7 +38,7 @@ public class PremierLeagueDAO {
 		}
 	}
 	
-	public List<Team> listAllTeams(){
+	public List<Team> listAllTeams(Map<Integer,Team> map){
 		String sql = "SELECT * FROM Teams";
 		List<Team> result = new ArrayList<Team>();
 		Connection conn = DBConnect.getConnection();
@@ -45,9 +47,11 @@ public class PremierLeagueDAO {
 			PreparedStatement st = conn.prepareStatement(sql);
 			ResultSet res = st.executeQuery();
 			while (res.next()) {
-
-				Team team = new Team(res.getInt("TeamID"), res.getString("Name"));
-				result.add(team);
+				if(!map.containsKey(res.getInt("TeamID"))) {
+					Team team = new Team(res.getInt("TeamID"), res.getString("Name"));
+					result.add(team);
+					map.put(res.getInt("TeamID"), team);
+				}
 			}
 			conn.close();
 			return result;
@@ -111,5 +115,117 @@ public class PremierLeagueDAO {
 			return null;
 		}
 	}
+	
+	public void getPareggioFuori(Map<Integer,Team> map) {
+		String sql="SELECT m.TeamAwayID, COUNT(m.ResultOfTeamHome) AS tot "
+				+ "FROM matches m "
+				+ "WHERE m.ResultOfTeamHome=0 "
+				+ "GROUP BY m.TeamAwayID";
+		
+		Connection conn = DBConnect.getConnection();
+
+		try {
+			PreparedStatement st = conn.prepareStatement(sql);
+			ResultSet res = st.executeQuery();
+			while (res.next()) {
+				if(map.containsKey(res.getInt("m.TeamAwayID"))) {
+					Team t=map.get(res.getInt("m.TeamAwayID"));
+					int pareggio=res.getInt("tot");
+					t.setPareggioFuori(pareggio);
+				}
+			}
+			conn.close();
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return;
+		}
+		
+	}
+	
+	public void getPareggioDentro(Map<Integer,Team> map) {
+		String sql="SELECT m.TeamHomeID, COUNT(m.ResultOfTeamHome) AS tot "
+				+ "FROM matches m "
+				+ "WHERE m.ResultOfTeamHome=0 "
+				+ "GROUP BY m.TeamHomeID";
+		
+		Connection conn = DBConnect.getConnection();
+
+		try {
+			PreparedStatement st = conn.prepareStatement(sql);
+			ResultSet res = st.executeQuery();
+			while (res.next()) {
+				if(map.containsKey(res.getInt("m.TeamHomeID"))) {
+					Team t=map.get(res.getInt("m.TeamHomeID"));
+					int pareggio=res.getInt("tot");
+					t.setPareggioDentro(pareggio);
+				}
+			}
+			conn.close();
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return;
+		}
+		
+	}
+	
+	public void getVittorieFuori(Map<Integer,Team> map) {
+		String sql="SELECT m.TeamAwayID, SUM(m.ResultOfTeamHome*(-3)) AS tot "
+				+ "FROM matches m "
+				+ "WHERE m.ResultOfTeamHome=-1 "
+				+ "GROUP BY m.TeamAwayID";
+		
+		Connection conn = DBConnect.getConnection();
+
+		try {
+			PreparedStatement st = conn.prepareStatement(sql);
+			ResultSet res = st.executeQuery();
+			while (res.next()) {
+				if(map.containsKey(res.getInt("m.TeamAwayID"))) {
+					Team t=map.get(res.getInt("m.TeamAwayID"));
+					int vittoria=res.getInt("tot");
+					t.setVittoriaFuori(vittoria);
+				}
+			}
+			conn.close();
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return;
+		}
+		
+	}
+	
+	public void getVittorieDentro(Map<Integer,Team> map) {
+		String sql="SELECT m.TeamHomeID, SUM(m.ResultOfTeamHome*(3)) AS tot "
+				+ "FROM matches m "
+				+ "WHERE m.ResultOfTeamHome=1 "
+				+ "GROUP BY m.TeamHomeID";
+		
+		Connection conn = DBConnect.getConnection();
+
+		try {
+			PreparedStatement st = conn.prepareStatement(sql);
+			ResultSet res = st.executeQuery();
+			while (res.next()) {
+				if(map.containsKey(res.getInt("m.TeamHomeID"))) {
+					Team t=map.get(res.getInt("m.TeamHomeID"));
+					int vittoria=res.getInt("tot");
+					t.setVittoriaDentro(vittoria);
+				}
+			}
+			conn.close();
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return;
+		}
+		
+	}
+	
+	
+	
+	
 	
 }
