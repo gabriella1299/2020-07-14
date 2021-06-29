@@ -1,6 +1,7 @@
 package it.polito.tdp.PremierLeague.model;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.jgrapht.Graph;
@@ -24,14 +25,16 @@ public class Model {
 	public void creaGrafo() {
 		this.grafo=new SimpleDirectedWeightedGraph<>(DefaultWeightedEdge.class);
 		this.map=new HashMap<>();
+		List<Team> list=this.dao.listAllTeams(map);
 		
-		Graphs.addAllVertices(this.grafo, this.dao.listAllTeams(map));
-		System.out.println(this.dao.listAllTeams(map));
-		for(Team t1: this.grafo.vertexSet()) {
-			for(Team t2:this.grafo.vertexSet()) {
+		Graphs.addAllVertices(this.grafo, list);
+		
+		for(Team t1: list) {
+			for(Team t2:list) {
 				if(!t1.getTeamID().equals(t2.getTeamID())) {
 					int p1=t1.getPareggioDentro()+t1.getPareggioFuori()+t1.getVittoriaDentro()+t1.getVittoriaFuori();
 					int p2=t2.getPareggioDentro()+t2.getPareggioFuori()+t2.getVittoriaDentro()+t2.getVittoriaFuori();
+					
 						if(p1>p2) {
 							if(this.grafo.getEdge(t1, t2)==null) {
 								

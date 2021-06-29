@@ -50,6 +50,7 @@ public class PremierLeagueDAO {
 				if(!map.containsKey(res.getInt("TeamID"))) {
 					Team team = new Team(res.getInt("TeamID"), res.getString("Name"));
 					result.add(team);
+					
 					map.put(res.getInt("TeamID"), team);
 				}
 			}
